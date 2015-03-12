@@ -47,7 +47,7 @@
 			if($reCompileFile){
 				//生成模板编译文件
 				self::compileTool = new CompileClass($this->path() , $compileFile);
-			
+				self::compileTool->compile();	
 				//生成缓存文件
 			}
 
@@ -102,26 +102,35 @@
 	class CompileClass{
 		private $compileFile;		//编译后的文件
 		private $templateFile;		//待编译的文件
+		private $P_T = array();
+		private $P_R = array();
+
 		public function __construct($templateFile , $compileFile){
-			$this->distFile = $distFile;
-			$this->templateFile = $arrConfig['templeDir'] . $templateFile . $arrConfig['profix'];
+			$this->templateFile = $templateFile;
+			$this->compileFile = $compileFile;
 
-			$P_T[] = '#\{(foreach|loop) (\\$[a-zA-Z_][a-zA-Z0-9_]*)\}#';
-			$P_T[] = '#\{\/(foreach|loop)\}#';
-			$P_T[] = '#\{if (.*?)\}#';
-			$P_T[] = '#\{(elseif|else if) (.*?)\}#';
-			$P_T[] = '#\{else\}#';
-			$P_T[] = '#\{\/if\}#';
+			$this->P_T[] = '#\{(foreach|loop) (\\$[a-zA-Z_][a-zA-Z0-9_]*)\}#';
+			$this->P_T[] = '#\{\/(foreach|loop)\}#';
+			$this->P_T[] = '#\{if (.*?)\}#';
+			$this->this->P_T[] = '#\{(elseif|else if) (.*?)\}#';
+			$this->P_T[] = '#\{else\}#';
+			$this->P_T[] = '#\{\/if\}#';
 
-			$P_R[] = "<?php echo '\\1(\\2 as $K=>$V){'; ?>";
-			$P_R[] = "<?php echo '}'; ?>";
-			$P_R[] = "<?php echo 'if(\\1){'; ?>";
-			$P_R[] = "<?php echo '}else if(\\2){'; ?>";
-			$P_R[] = "<?php echo '}else{'; ?>";
-			$P_R[] = "<?php echo '}'; ?>";
+			$this->P_R[] = "<?php echo '\\1(\\2 as $K=>$V){'; ?>";
+			$this->P_R[] = "<?php echo '}'; ?>";
+			$this->P_R[] = "<?php echo 'if(\\1){'; ?>";
+			$this->P_R[] = "<?php echo '}else if(\\2){'; ?>";
+			$this->P_R[] = "<?php echo '}else{'; ?>";
+			$this->P_R[] = "<?php echo '}'; ?>";
 		}
 
 		public function compile(){
-			$templateFile = 
+			if(!file_exists($this->templateFile)){
+				echo '模板文件不存在.';
+				exit;
+			}
+			$content = file_get_contents($this->templateFile);
+			$content = preg_replace($this->P_T , $this->P_R , $content);
+			file_put_contents($compileFile , $content , FILE_APPEND);
 		}
 	}
